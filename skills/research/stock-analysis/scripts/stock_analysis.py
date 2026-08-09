@@ -249,6 +249,18 @@ def render(d, out, peers=None):
 
         # ---- Research sections (concall / PPT / results) ----
         research = d.get("research") or {}
+        # Growth override: yfinance trailing growth is often stale/wrong vs reported.
+        # If research provides real reported growth, use it everywhere.
+        g = research.get("growth")
+        if g:
+            if g.get("revenue") is not None:
+                d["rev_growth"] = g["revenue"]
+            if g.get("net_income") is not None:
+                d["ni_growth"] = g["net_income"]
+            if g.get("rev_car"):
+                d["rev_car"] = g["rev_car"]
+            if g.get("ni_car"):
+                d["ni_car"] = g["ni_car"]
         # Concalls
         concalls = research.get("concalls") or []
         if concalls:
@@ -311,7 +323,7 @@ def render(d, out, peers=None):
         # ---- Thesis (Momentum & Growth framework) ----
         thesis = research.get("thesis") or []
         # Auto: Gaadi-ka-Speed verdict from growth acceleration
-        rev_car_txt = d["rev_car"][1]
+        rev_car_txt = d["rev_car"][1].upper()
         speed = "ACCELERATING (speeding up)" if "SPEEDING" in rev_car_txt else ("DECELERATING (slowing)" if "SLOWING" in rev_car_txt else "FLAT / UNCLEAR")
         auto = [f"Gaadi-ka-Speed (sales growth pace): {speed} — {d['rev_car'][0]}"]
         if d["rev_growth"] is not None and d["rev_growth"] >= 15:
