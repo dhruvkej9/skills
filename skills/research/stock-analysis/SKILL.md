@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.0.0
+version: 2.1.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -94,6 +94,25 @@ curl -s "https://www.screener.in/api/company/<ID>/chart/?q=Price-DMA50-DMA200-Vo
       "highlights": ["guidance", "capex", "segment performance"]
     }
   ],
+  "guidance": {
+    "Volume growth guidance": "~18% YoY",
+    "Margin guidance": "+100bps YoY; W&C 10.5% by FY28",
+    "Capex plan": "₹1,200 cr (~80% cable); ₹600-650 cr deployed FY27",
+    "FMEG": "Yearly breakeven expected this year"
+  },
+  "quotes": [
+    {
+      "speaker": "Management",
+      "context": "Q1 FY27 — Growth outlook",
+      "text": "Verbatim management quote from the concall transcript (exact wording)"
+    }
+  ],
+  "sources": [
+    "Investor Presentation Q1 FY27 — https://www.rrkabel.com/investor-presentation/",
+    "Q1 FY27 Earnings Call Transcript — https://alphastreet.com/india/r-r-kabel-ltd-rrkabel-q1-2027-earnings-call-transcript/",
+    "Earnings Call Intimation (BSE) — https://www.bseindia.com/xml-data/corpfiling/AttachLive/0995bfda-62a9-4190-b87c-d507a0686828.pdf",
+    "Screener RRKABEL — https://www.screener.in/company/RRKABEL/consolidated/"
+  ],
   "presentation": {
     "title": "Investor Presentation — Q1 FY27 (Jul 2026)",
     "highlights": ["key deck takeaway 1", "key deck takeaway 2"]
@@ -142,17 +161,19 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 1. **Header** — ticker, company name, sector, currency, report date
 2. **Price card** — current price, day change, 52-week high/low, market cap, 1Y return
 3. **Growth (Racing Car)** — YoY revenue & net-income growth, speeding up / slowing down
-4. **Future & Guidance** — ROCE (no analyst target / forward P/E / consensus — removed)
+4. **Future & Guidance** — ROCE/ROE + **detailed guidance rows** from `guidance` dict (volume, margin, capex, FMEG, industry, retail, exports, data center). NO analyst target / forward P/E / consensus (removed)
 5. **Brutal Honesty & Risks** — researched risk flags + auto data-driven warnings
 6. **Latest Results** — latest quarter revenue/profit/margins
 7. **Concall Analysis (Past 2+)** — per-call summary + management highlights
-8. **Investor Presentation** — latest deck takeaways
-9. **Margins** — gross, operating, net margin
-10. **Fundamentals** — P/E, EPS, book value, dividend yield, ROE
-11. **Technicals** — 50/200-day SMA, RSI(14) (if provided in research.json)
-12. **Sector Peer Comparison (Fastest Car)** — ranks target + peers TOGETHER by revenue growth; ONLY the single fastest is green; target gets a "Target" tag on the right
-13. **Thesis** — Momentum & Growth framework check
-14. **Price chart** — 1-year close with 50/200-day SMA overlay (only if `research.json` provides a `chart_path`)
+8. **Exact Quotes from Concalls** — verbatim management quotes from `quotes` array, rendered as **highlighted amber cards** (speaker + context header + exact wording)
+9. **Investor Presentation** — latest deck takeaways
+10. **Margins** — gross, operating, net margin
+11. **Fundamentals** — P/E, EPS, book value, dividend yield, ROE
+12. **Technicals** — 50/200-day SMA, RSI(14) (if provided in research.json)
+13. **Sector Peer Comparison (Fastest Car)** — ranks target + peers TOGETHER by revenue growth; ONLY the single fastest is green; target gets a "Target" tag on the right
+14. **Thesis** — Momentum & Growth framework check
+15. **Price chart** — 1-year close with 50/200-day SMA overlay (only if `research.json` provides a `chart_path`)
+16. **Sources & Reference Reports** — every PDF/report used, as **clickable links** (URLs auto-linkified in the script)
 
 > **NO verdict / buy-sell / analyst consensus / target price.** This is a pure data report. The user does not want investment opinions.
 
@@ -163,9 +184,10 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 2. **Fetch real data from Screener.in** (authenticated session) — fundamentals, quarterly YoY growth, ratios, price. Do the same for each peer.
 3. **Research phase (web):**
    a. BSE/NSE filings + company IR → latest results, concalls, investor presentation.
-   b. Extract revenue/PAT/margins, concall summary + highlights, deck takeaways.
+   b. Extract revenue/PAT/margins, concall summary + highlights, **verbatim management quotes** (exact wording for the `quotes` array), **detailed guidance** (volume, margin, capex, FMEG, etc. for the `guidance` dict).
    c. Write the `brutal` risk list + `thesis` framework points.
-   d. Save everything to `research.json`.
+   d. Collect **source links** — company IR, AlphaStreet transcript, BSE filing PDFs, Screener peer pages — into the `sources` array (real URLs, not labels).
+   e. Save everything to `research.json`.
 4. **Generate:** run the script with ticker + `--research research.json`.
 5. **Deliver:** send the PDF via `MEDIA:/path/to/report.pdf` on WhatsApp.
 6. **Summarize:** 2-3 lines — key data points + top brutal risk + one highlight.
@@ -181,6 +203,8 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 - **Stale transcripts** — verify the concall quarter/date is actually the latest.
 - **WeasyPrint missing** — install with `pip install weasyprint` (+ `apt install libpango` on Linux).
 - **html5lib missing** — `pip install html5lib` (needed for `pd.read_html`).
+- **Sources must be real links** — put actual URLs in the `sources` array, not labels like "company IR". The script auto-linkifies any `http(s)://` in the list.
+- **Quotes must be verbatim** — copy the exact wording from the transcript, don't paraphrase. If you can't get the exact text, omit the quote rather than invent it.
 
 ---
 
