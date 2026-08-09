@@ -30,6 +30,7 @@
   h2 { font-size: 15px; color: #1e3a8a; margin: 24px 0 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; }
+  tr.fastest td { background: #ecfdf5; color: #065f46; font-weight: bold; }
   td.k { color: #64748b; width: 45%; }
   td.v { font-weight: 600; text-align: right; }
   .chart { margin-top: 14px; }
@@ -42,7 +43,7 @@
 <body>
   <div class="header">
     <h1>{{NAME}}</h1>
-    <div class="sub">{{TICKER}} · {{CURRENCY}} · Report date {{DATE}}</div>
+    <div class="sub">{{TICKER}} · {{SECTOR}} · {{CURRENCY}} · Report date {{DATE}}</div>
   </div>
   <div class="body">
     <div class="verdict {{VERDICT}}">{{VERDICT}}</div>
@@ -55,6 +56,21 @@
       <div class="card"><div class="label">52W Low</div><div class="val">{{LOW52}}</div></div>
       <div class="card"><div class="label">1Y Return</div><div class="val">{{RET1Y}}</div></div>
     </div>
+
+    <h2>Growth (Racing Car)</h2>
+    <table>
+      <tr><td class="k">Revenue Growth (YoY)</td><td class="v">{{REVGROWTH}}</td></tr>
+      <tr><td class="k">Revenue Momentum</td><td class="v">{{REVCAR}}</td></tr>
+      <tr><td class="k">Net Income Growth (YoY)</td><td class="v">{{NIGROWTH}}</td></tr>
+      <tr><td class="k">Profit Momentum</td><td class="v">{{NICAR}}</td></tr>
+    </table>
+
+    <h2>Margins</h2>
+    <table>
+      <tr><td class="k">Gross Margin</td><td class="v">{{GROSSM}}</td></tr>
+      <tr><td class="k">Operating Margin</td><td class="v">{{OPM}}</td></tr>
+      <tr><td class="k">Net Margin</td><td class="v">{{NETM}}</td></tr>
+    </table>
 
     <h2>Fundamentals</h2>
     <table>
@@ -70,6 +86,12 @@
       <tr><td class="k">50-Day SMA</td><td class="v">{{SMA50}}</td></tr>
       <tr><td class="k">200-Day SMA</td><td class="v">{{SMA200}}</td></tr>
       <tr><td class="k">RSI (14)</td><td class="v">{{RSI}}</td></tr>
+    </table>
+
+    <h2>Sector Peer Comparison (Fastest Car)</h2>
+    <table>
+      <tr><td class="k">#</td><td class="k">Company</td><td class="k">Rev Growth</td><td class="k">Net Inc Growth</td></tr>
+      {{PEERS}}
     </table>
 
     <h2>Price Chart (1Y)</h2>

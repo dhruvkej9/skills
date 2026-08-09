@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Stock analysis -> beautiful PDF report (WeasyPrint + yfinance).
 
+Focus: guidance, growth rate & acceleration (racing-car), and sector peer
+comparison to find the fastest-growing company.
+
 Usage:
-    python3 stock_analysis.py "RELIANCE.NS" [--out report.pdf] [--days 365]
+    python3 stock_analysis.py "RELIANCE.NS" [--out report.pdf] [--days 365] \
+        [--peers TATAMOTORS.NS,ASHOKLEY.NS,...]
 """
 import argparse, os, sys, tempfile
 from datetime import datetime
@@ -31,6 +35,39 @@ def _pct(v):
     return f"{v:+.2f}%"
 
 
+def _growth(series):
+    """YoY growth of a pandas Series (latest vs prior year). Returns (pct, accel)."""
+    try:
+        s = series.dropna()
+        if len(s) < 2:
+            return None, None
+        cur, prev = float(s.iloc[-1]), float(s.iloc[-2])
+        if prev == 0:
+            return None, None
+        g = (cur - prev) / prev * 100
+        # acceleration: compare the most recent growth to the prior period's growth
+        if len(s) >= 3:
+            prev2 = float(s.iloc[-3])
+            g_prior = (prev - prev2) / prev2 * 100 if prev2 else 0
+            accel = g - g_prior
+        else:
+            accel = None
+        return g, accel
+    except Exception:
+        return None, None
+
+
+def _car_status(g, accel):
+    """Racing-car analogy: is the car speeding up or slowing down?"""
+    if g is None:
+        return "No growth data", "—"
+    if accel is None:
+        return f"Growing {g:+.1f}%/yr", "unknown"
+    if accel > 0:
+        return f"Growing {g:+.1f}%/yr", f"SPEEDING UP (+{accel:.1f}pt vs prior)"
+    return f"Growing {g:+.1f}%/yr", f"SLOWING DOWN ({accel:+.1f}pt vs prior)"
+
+
 def fetch(ticker, days):
     t = yf.Ticker(ticker)
     hist = t.history(period=f"{days}d")
@@ -42,15 +79,26 @@ def fetch(ticker, days):
     prev = float(close.iloc[-2]) if len(close) > 1 else price
     sma50 = float(close.rolling(50).mean().iloc[-1]) if len(close) >= 50 else None
     sma200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else None
-    # RSI(14)
     delta = close.diff()
     gain = delta.clip(lower=0).rolling(14).mean()
     loss = (-delta.clip(upper=0)).rolling(14).mean()
     rs = gain / loss.replace(0, float("nan"))
     rsi = float((100 - 100 / (1 + rs)).iloc[-1]) if not rs.isna().all() else None
+
+    # ---- Growth (racing car) ----
+    rev_g, rev_acc = _growth(t.income_stmt.loc["Total Revenue"]) if "Total Revenue" in t.income_stmt.index else (None, None)
+    ni_g, ni_acc = _growth(t.income_stmt.loc["Net Income"]) if "Net Income" in t.income_stmt.index else (None, None)
+    rev_car = _car_status(rev_g, rev_acc)
+    ni_car = _car_status(ni_g, ni_acc)
+    # Margins
+    gross_m = info.get("grossMargins")
+    op_m = info.get("operatingMargins")
+    net_m = info.get("profitMargins")
+
     return {
         "ticker": ticker,
         "name": info.get("longName") or info.get("shortName") or ticker,
+        "sector": info.get("sector", "—"),
         "currency": info.get("currency", "INR"),
         "price": price,
         "day_change": price - prev,
@@ -63,12 +111,34 @@ def fetch(ticker, days):
         "book": info.get("bookValue"),
         "div_yield": info.get("dividendYield"),
         "roe": info.get("returnOnEquity"),
-        "sma50": sma50,
-        "sma200": sma200,
-        "rsi": rsi,
+        "sma50": sma50, "sma200": sma200, "rsi": rsi,
         "ret1y": (price / float(close.iloc[0]) - 1) * 100 if len(close) > 1 else 0,
+        "rev_growth": rev_g, "rev_accel": rev_acc, "rev_car": rev_car,
+        "ni_growth": ni_g, "ni_accel": ni_acc, "ni_car": ni_car,
+        "gross_m": gross_m, "op_m": op_m, "net_m": net_m,
         "hist": hist,
     }
+
+
+def fetch_peers(tickers):
+    """Return list of {ticker,name,rev_growth,ni_growth,car} for peers."""
+    peers = []
+    for tk in tickers:
+        try:
+            t = yf.Ticker(tk.strip())
+            info = t.info or {}
+            rev_g, _ = _growth(t.income_stmt.loc["Total Revenue"]) if "Total Revenue" in t.income_stmt.index else (None, None)
+            ni_g, _ = _growth(t.income_stmt.loc["Net Income"]) if "Net Income" in t.income_stmt.index else (None, None)
+            peers.append({
+                "ticker": tk.strip(),
+                "name": info.get("shortName") or tk.strip(),
+                "rev_growth": rev_g, "ni_growth": ni_g,
+            })
+        except Exception:
+            continue
+    # rank by revenue growth desc
+    peers.sort(key=lambda p: (p["rev_growth"] if p["rev_growth"] is not None else -1e9), reverse=True)
+    return peers
 
 
 def verdict(d):
@@ -94,6 +164,13 @@ def verdict(d):
             score += 1; reasons.append(f"P/E {d['pe']:.1f} — reasonable valuation")
         elif d["pe"] > 40:
             score -= 1; reasons.append(f"P/E {d['pe']:.1f} — rich valuation")
+    # growth tilt
+    if d["rev_growth"] is not None and d["rev_growth"] > 15:
+        score += 1; reasons.append(f"Revenue growing {d['rev_growth']:.0f}%/yr — strong")
+    if d["rev_accel"] is not None and d["rev_accel"] > 0:
+        score += 1; reasons.append("Growth is ACCELERATING (racing car speeding up)")
+    elif d["rev_accel"] is not None:
+        score -= 1; reasons.append("Growth is DECELERATING (racing car slowing)")
     if score >= 2:
         return "BUY", reasons
     if score <= -2:
@@ -120,17 +197,17 @@ def chart(d, out_png):
     plt.close(fig)
 
 
-def render(d, out):
+def render(d, out, peers=None):
     v, reasons = verdict(d)
     with tempfile.TemporaryDirectory() as td:
         png = os.path.join(td, "chart.png")
         chart(d, png)
-        # chart is referenced as file:// relative to template; copy alongside
         chart_abs = os.path.abspath(png)
         html = open(TEMPLATE).read()
         html = html.replace("{{CHART}}", f"file://{chart_abs}")
         html = (html.replace("{{TICKER}}", d["ticker"])
                     .replace("{{NAME}}", d["name"])
+                    .replace("{{SECTOR}}", d["sector"])
                     .replace("{{CURRENCY}}", d["currency"])
                     .replace("{{DATE}}", datetime.now().strftime("%d %b %Y"))
                     .replace("{{PRICE}}", _fmt(d["price"]))
@@ -141,15 +218,32 @@ def render(d, out):
                     .replace("{{PE}}", _fmt(d["pe"]))
                     .replace("{{EPS}}", _fmt(d["eps"]))
                     .replace("{{BOOK}}", _fmt(d["book"]))
-                    .replace("{{DIV}}", _pct(d["div_yield"] * 100) if d["div_yield"] else "—")
+                    .replace("{{DIV}}", _pct(d["div_yield"] * 100) if (d["div_yield"] and d["div_yield"] < 0.1) else (_pct(d["div_yield"]) if d["div_yield"] else "—"))
                     .replace("{{ROE}}", _pct(d["roe"] * 100) if d["roe"] else "—")
                     .replace("{{SMA50}}", _fmt(d["sma50"]))
                     .replace("{{SMA200}}", _fmt(d["sma200"]))
                     .replace("{{RSI}}", _fmt(d["rsi"]))
                     .replace("{{RET1Y}}", _pct(d["ret1y"]))
+                    .replace("{{REVGROWTH}}", _pct(d["rev_growth"]))
+                    .replace("{{REVCAR}}", d["rev_car"][1])
+                    .replace("{{NIGROWTH}}", _pct(d["ni_growth"]))
+                    .replace("{{NICAR}}", d["ni_car"][1])
+                    .replace("{{GROSSM}}", _pct(d["gross_m"] * 100) if d["gross_m"] else "—")
+                    .replace("{{OPM}}", _pct(d["op_m"] * 100) if d["op_m"] else "—")
+                    .replace("{{NETM}}", _pct(d["net_m"] * 100) if d["net_m"] else "—")
                     .replace("{{VERDICT}}", v))
         reasons_html = "".join(f"<li>{r}</li>" for r in reasons)
         html = html.replace("{{REASONS}}", reasons_html)
+        # Peer table
+        if peers:
+            rows = ""
+            for i, p in enumerate(peers, 1):
+                cls = ' class="fastest"' if i == 1 and p["rev_growth"] is not None else ""
+                rows += (f"<tr{cls}><td>{i}</td><td>{p['name']} ({p['ticker']})</td>"
+                         f"<td>{_pct(p['rev_growth'])}</td><td>{_pct(p['ni_growth'])}</td></tr>")
+            html = html.replace("{{PEERS}}", rows)
+        else:
+            html = html.replace("{{PEERS}}", "<tr><td colspan=4>No peers supplied. Pass --peers TICKER,TICKER to compare.</td></tr>")
         HTML(string=html, base_url=td).write_pdf(out)
 
 
@@ -158,12 +252,16 @@ def main():
     ap.add_argument("ticker")
     ap.add_argument("--out", default=None)
     ap.add_argument("--days", type=int, default=365)
+    ap.add_argument("--peers", default="", help="Comma-separated peer tickers, e.g. TATAMOTORS.NS,ASHOKLEY.NS")
     a = ap.parse_args()
     out = a.out or f"stock_report_{a.ticker.replace('.', '_')}.pdf"
     d = fetch(a.ticker, a.days)
-    render(d, out)
+    peers = fetch_peers([p for p in a.peers.split(",") if p.strip()]) if a.peers else None
+    render(d, out, peers)
     print(f"OK: {out} ({os.path.getsize(out)} bytes)")
     print(f"Verdict: {verdict(d)[0]} @ {d['currency']} {d['price']:.2f}")
+    if d["rev_car"][1] != "—":
+        print(f"Growth: {d['rev_car'][0]} — {d['rev_car'][1]}")
 
 
 if __name__ == "__main__":
