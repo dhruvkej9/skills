@@ -261,6 +261,14 @@ def render(d, out, peers=None):
                 d["rev_car"] = g["rev_car"]
             if g.get("ni_car"):
                 d["ni_car"] = g["ni_car"]
+        # Fundamentals override: yfinance price/valuation is often stale/wrong.
+        # If research provides real figures (e.g. from Screener), use them.
+        f = research.get("fundamentals")
+        if f:
+            for k in ("price", "day_pct", "high52", "low52", "mktcap", "pe",
+                      "eps", "book", "div_yield", "roe", "roce", "sma50", "sma200", "rsi", "ret1y"):
+                if f.get(k) is not None:
+                    d[k] = f[k]
         # Concalls
         concalls = research.get("concalls") or []
         if concalls:
