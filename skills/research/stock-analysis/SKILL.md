@@ -1,67 +1,148 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + yfinance + web research)."
-version: 1.1.0
+version: 1.2.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    tags: [stock, finance, analysis, pdf, report, weasyprint, yfinance, concall, earnings]
+    tags: [stock, finance, analysis, pdf, report, weasyprint, yfinance, concall, earnings, investor-presentation]
     category: research
-    related_skills: [equity-research, pdf-creation]
+    related_skills: [equity-research, pdf-creation, online-shopping-research]
 ---
 
 # Stock Analysis + PDF Report
 
-Analyze any stock (NSE/BSE or global) and produce a **beautiful PDF report** with price action, fundamentals, technicals, growth, **past 2+ earnings concalls**, **latest results**, **investor presentation**, and a brutally honest verdict.
+Analyze any stock (NSE/BSE or global) and produce a **beautiful PDF report** covering price action, fundamentals, technicals, growth, **past 2+ earnings concalls**, **latest results**, **investor presentation**, and a **brutally honest** verdict.
 
-**Two data sources, two phases:**
-- **Script** (`stock_analysis.py`) → pulls price/fundamentals/technicals/forward estimates from **yfinance**.
-- **Agent (you)** → does **web research** for concalls, results, and investor PPT (BSE/NSE filings, AlphaStreet, company IR), then passes it to the script via `--research research.json`.
+## The two data sources (READ THIS FIRST)
 
-Yahoo Finance does **NOT** have concalls or PPTs — those must come from web research.
+The report combines two independent data sources. Do NOT confuse them:
 
-## When to Use
+| Source | What it provides | Fetched by |
+|--------|-----------------|------------|
+| **yfinance** | Price, market cap, P/E, EPS, book value, dividend yield, ROE, forward P/E, forward EPS, analyst target, consensus, RSI, 50/200-day SMA, 1Y return, revenue/profit growth | `stock_analysis.py` (automatic) |
+| **Web research** | Earnings concall transcripts (past 2+), latest quarterly results, investor presentation deck, brutal risk flags | **You (the agent)** — web search + extraction |
 
-Use whenever the user wants a stock analyzed or a formatted PDF report on a ticker. For a **full** report (with concalls/PPT/results), you MUST do the web-research phase — the script alone only produces the quantitative sections.
+> ⚠️ **Yahoo Finance does NOT have concalls, PPTs, or detailed results commentary.** Those MUST come from web research. Never claim the script fetched them.
 
-## Requirements
+---
 
-- `yfinance`, `requests`, `weasyprint` (all present in the Hermes venv)
-- Internet access (live market data + web research)
+## Phase 1 — Web research (REQUIRED for a full report)
 
-## Phase 1 — Web research (concall / results / PPT)
+This is the part that makes the report valuable. Do it thoroughly.
 
-For the target company, find:
-1. **Past 2+ earnings concall transcripts** — search `"<Company> <quarter> earnings call transcript"` (AlphaStreet, BSE filing PDFs, company IR).
-2. **Latest quarterly results** — revenue, PAT, margins, YoY growth.
-3. **Latest investor presentation / corporate deck** — company IR or BSE filing.
+### 1.1 Find the latest quarterly results
 
-Build a `research.json`:
+**Search queries:**
+- `"<Company Name>" "<latest quarter>" results revenue PAT`
+- `"<Company Name>" quarterly results <year>`
+- `"<Company Name>" Q4 FY26 results`
+
+**Sources (in priority order):**
+1. **Company IR page** — `<company>.com/investors` or `/investor-relations`
+2. **BSE/NSE stock exchange filing** — search `site:bseindia.com <Company> results` or `site:nseindia.com`
+3. **Screener.in** — `https://www.screener.in/company/<SYMBOL>/` (quarterly results, ratios, shareholding)
+4. **Moneycontrol / Investing.com** — quarterly results summary pages
+
+**Extract these numbers:**
+- Quarter + year (e.g. "Q4 FY26, Apr 2026")
+- Revenue (₹ cr) + YoY growth %
+- Net profit / PAT (₹ cr) + YoY growth %
+- EBITDA margin %, PAT margin %
+- Any one-off items or exceptional charges
+
+### 1.2 Find past 2+ earnings concall transcripts
+
+**Search queries:**
+- `"<Company Name>" earnings call transcript <quarter> <year>`
+- `"<Company Name>" concall transcript <quarter>`
+- `"<Company Name>" Q1 FY26 concall` / `Q4 FY25 concall`
+
+**Sources (in priority order):**
+1. **AlphaStreet** — `alphastreet.com` (clean transcripts, most reliable)
+2. **BSE filing PDFs** — companies often file concall transcripts as PDFs (search `site:bseindia.com <Company> concall`)
+3. **Company IR** — investor presentation + transcript PDFs
+4. **Investing.com / TradingView** — earnings call transcripts
+
+**For EACH concall, extract:**
+- Quarter + call date
+- **Summary** (2-3 sentences): what management said about the quarter — demand, segments, outlook
+- **Highlights** (3-6 bullets): guidance, capex plans, segment performance, margin commentary, management quotes
+
+> Get at least the **past 2 concalls** (e.g. Q1 FY26 + Q4 FY25). Add more if the story is complex or recent quarters matter.
+
+### 1.3 Find the latest investor presentation
+
+**Search queries:**
+- `"<Company Name>" investor presentation <year> PDF`
+- `"<Company Name>" corporate presentation <year>`
+- `site:<company-domain> investor presentation`
+
+**Sources:**
+1. **Company IR page** — most companies host the latest deck
+2. **BSE filing** — presentations are often filed
+3. **Google/PDF search** — `filetype:pdf "<Company>" investor presentation`
+
+**Extract 3-6 key takeaways** from the deck: growth strategy, market opportunity, capacity/capex plans, segment roadmap, financial targets.
+
+### 1.4 Build `research.json`
+
+Create a JSON file with this exact structure:
+
 ```json
 {
   "results": {
     "quarter": "Q4 FY26 (Apr 2026)",
     "revenue": "₹2,964.1 cr (+33.7% YoY)",
     "profit": "PAT ₹168.0 cr (+30.1% YoY)",
-    "margin": "EBITDA 8.9% · PAT 5.7%"
+    "margin": "EBITDA 8.9% · PAT 5.7%",
+    "note": "optional: one-line context (one-offs, exceptional items)"
   },
   "concalls": [
     {
       "quarter": "Q1 FY26",
       "date": "1 Aug 2025",
-      "summary": "2-3 sentence management summary",
-      "highlights": ["guidance / capex / segment points"]
+      "summary": "2-3 sentence management summary of the quarter and outlook",
+      "highlights": [
+        "Guidance: 18% volume growth, 100bps margin improvement for FY26",
+        "CapEx: ₹1,200 cr to double cable capacity, targeting +₹4,500 cr topline",
+        "FMEG: EBIT breakeven expected this year"
+      ]
+    },
+    {
+      "quarter": "Q4 FY25",
+      "date": "May 2025",
+      "summary": "2-3 sentence summary",
+      "highlights": ["point 1", "point 2"]
     }
   ],
   "presentation": {
     "title": "Investor Presentation (Apr 2026)",
-    "highlights": ["key deck takeaways"]
+    "highlights": ["key deck takeaway 1", "key deck takeaway 2"]
   },
-  "brutal": ["honest risk flags, not sugarcoated"]
+  "brutal": [
+    "honest risk flag 1 — do not sugarcoat",
+    "honest risk flag 2"
+  ]
 }
 ```
+
+### 1.5 Write the `brutal` list (CRITICAL)
+
+The `brutal` array is the **most important part** — it's what makes this report trustworthy. Include honest, specific concerns. Examples:
+
+- **Growth quality** — is revenue growth real volume or just price inflation? (e.g. "volume grew 6.5% but revenue grew 13.9% — a chunk is copper price inflation, not demand")
+- **Margin weakness** — is EBITDA margin thin vs peers?
+- **Loss-making segments** — any segment still losing money despite promises?
+- **Capex risk** — big capex bets with execution risk
+- **Valuation** — is P/E expensive? You're paying a premium for growth.
+- **Data conflicts** — if yfinance trailing growth disagrees with management-reported growth, surface it. Don't hide it.
+
+The script ALSO auto-adds data-driven warnings (negative trailing growth, RSI > 70 overbought, P/E > 40 expensive). Combine those with your researched points.
+
+---
 
 ## Phase 2 — Generate the PDF
 
@@ -72,47 +153,69 @@ python3 scripts/stock_analysis.py "RELIANCE.NS" \
   --out /path/to/report.pdf
 ```
 
-- Ticker format: Indian stocks use `.NS` (NSE) or `.BO` (BSE), e.g. `RELIANCE.NS`, `HDFCBANK.NS`. Global: `AAPL`, `TSLA`.
-- `--research` (optional) injects concall/results/PPT/brutal sections. Without it, those sections show "no data provided".
-- `--peers` (optional) adds a **sector peer comparison** table, ranked by revenue growth with the fastest company highlighted — the "fastest car".
-- `--out` defaults to `stock_report_<TICKER>.pdf`; `--days` (default 365) sets the price-history window.
+### Arguments
 
-## What the report contains
+| Arg | Required | Description |
+|-----|----------|-------------|
+| `TICKER` | ✅ | Indian: `.NS` (NSE) or `.BO` (BSE). Global: `AAPL`, `TSLA` |
+| `--research` | for full report | Path to `research.json` (concall/results/PPT/brutal) |
+| `--peers` | optional | Comma-separated peer tickers → sector comparison table |
+| `--out` | optional | Output path (default `stock_report_<TICKER>.pdf`) |
+| `--days` | optional | Price-history window in days (default 365) |
 
-- **Header** — ticker, company name, sector, currency, report date
-- **Price card** — current price, day change, 52-week high/low, market cap, 1Y return
-- **Growth (Racing Car)** — YoY revenue & net-income growth, speeding up / slowing down
-- **Future & Guidance** — forward P/E, forward EPS, analyst target, upside, consensus
-- **Brutal Honesty & Risks** — honest risk flags (from research + auto data-driven warnings)
-- **Latest Results** — latest quarter revenue/profit/margins
-- **Concall Analysis (Past 2+)** — summaries + management highlights per call
-- **Investor Presentation** — latest deck takeaways
-- **Margins** — gross, operating, net margin
-- **Fundamentals** — P/E, EPS, book value, dividend yield, ROE
-- **Technicals** — 50/200-day SMA, RSI(14)
-- **Sector Peer Comparison** — ranks peers by revenue growth, highlights fastest
-- **Verdict** — data-driven buy/hold/sell signal with rationale
-- **Price chart** — 1-year close with 50/200-day SMA overlay
+---
 
-## Procedure
+## What the report contains (all sections)
 
-1. **Research phase:** web-search concall transcripts (past 2+), latest results, and investor PPT. Extract key numbers + management commentary. Build `research.json` with `results`, `concalls`, `presentation`, and `brutal` risk flags.
-2. **Generate:** run the script with the ticker, `--research research.json`, and `--peers` if comparing.
-3. If the ticker fails (no data), try `.NS`/`.BO` suffix for Indian stocks or the correct global symbol.
-4. Present the PDF to the user (send via `MEDIA:/path/to/report.pdf` on WhatsApp).
-5. Summarize the verdict + top brutal risk in 2-3 lines alongside the PDF.
+1. **Header** — ticker, company name, sector, currency, report date
+2. **Price card** — current price, day change, 52-week high/low, market cap, 1Y return
+3. **Growth (Racing Car)** — YoY revenue & net-income growth, speeding up / slowing down
+4. **Future & Guidance** — forward P/E, forward EPS, analyst target, upside %, consensus, # analysts
+5. **Brutal Honesty & Risks** — researched risk flags + auto data-driven warnings
+6. **Latest Results** — latest quarter revenue/profit/margins
+7. **Concall Analysis (Past 2+)** — per-call summary + management highlights
+8. **Investor Presentation** — latest deck takeaways
+9. **Margins** — gross, operating, net margin
+10. **Fundamentals** — P/E, EPS, book value, dividend yield, ROE
+11. **Technicals** — 50/200-day SMA, RSI(14)
+12. **Sector Peer Comparison** — ranks peers by revenue growth, highlights fastest
+13. **Verdict** — data-driven buy/hold/sell signal with rationale
+14. **Price chart** — 1-year close with 50/200-day SMA overlay
+
+---
+
+## Procedure (end-to-end)
+
+1. **Identify the ticker.** Indian → `.NS`/`.BO`; global → bare symbol. Ask the user if unclear.
+2. **Research phase:**
+   a. Web-search latest results → extract revenue/PAT/margins.
+   b. Web-search past 2+ concall transcripts → extract summary + highlights per call.
+   c. Web-search latest investor presentation → extract key takeaways.
+   d. Write the `brutal` risk list (honest, specific, not sugarcoated).
+   e. Save all of it to `research.json`.
+3. **Generate:** run the script with ticker + `--research research.json` + `--peers` (if comparing).
+4. **Handle failures:** if the ticker errors, try `.NS`/`.BO` or the correct global symbol.
+5. **Deliver:** send the PDF via `MEDIA:/path/to/report.pdf` on WhatsApp.
+6. **Summarize:** 2-3 lines — verdict + top brutal risk + one notable highlight.
+
+---
 
 ## Pitfalls
 
-- **Concall/PPT NOT in yfinance** — always do the web-research phase for those; never claim the script fetched them.
+- **Concall/PPT NOT in yfinance** — always do web research for those. Never claim the script fetched them.
 - **Wrong ticker suffix** — Indian stocks need `.NS`/`.BO`. Bare `RELIANCE` fails.
 - **Data conflicts** — yfinance trailing growth may disagree with management-reported growth (different periods). Surface the conflict in `brutal`, don't hide it.
+- **Stale transcripts** — verify the concall quarter/date is actually the latest. Old transcripts give a wrong picture.
 - **No internet** — script errors out; report can't be generated offline.
 - **Delisted/illiquid** — `yfinance` may return empty; verify the symbol.
 - **WeasyPrint missing** — install with `pip install weasyprint`.
+- **Peer tickers wrong** — verify peer symbols exist before passing `--peers`.
+
+---
 
 ## Verification
 
 - Confirm the PDF exists and is non-empty (`ls -la <out>`).
-- Open/parse it to confirm all sections rendered (price, fundamentals, concalls, verdict).
+- Open/parse it to confirm all sections rendered (price, fundamentals, concalls, brutal, verdict).
 - Cross-check the current price against a live source if accuracy matters.
+- Verify concall quarters are the actual latest 2 (not older ones).
