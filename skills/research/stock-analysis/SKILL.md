@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.2.0
+version: 2.3.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -18,10 +18,15 @@ Analyze any stock (NSE/BSE) and produce a **beautiful PDF report** covering pric
 
 > ⚠️ **yfinance is REMOVED.** Its trailing data was stale/wrong end-to-end. All data comes from **Screener.in (authenticated session)** + **BSE/NSE filings** + **company IR**. The script is 100% `research.json`-driven — it does NOT fetch anything itself.
 
-## Trusted data sources (ONLY these)
-- **Screener.in** — fundamentals, quarterly results, ratios, price, technicals (authenticated via session tokens)
-- **BSE / NSE** — official filings, results, concall transcript PDFs, investor presentations
-- **Company IR page** — investor decks, results, guidance
+## Trusted data sources (ONLY these, in order)
+1. **NSE** — always use NSE data first (current price, 52-week high/low, market cap, P/E). RRKABEL etc. are NSE-listed.
+2. **BSE** — ONLY if the stock is NOT listed on NSE.
+3. **Screener.in** — mirrors NSE/BSE data; its **key-points box** (Current Price, High/Low, Market Cap, P/E, ROCE, ROE) is the authoritative source for these figures.
+4. **Company IR page** — investor decks, results, guidance.
+
+> **⚠️ FINANCIAL DATA RULE — STRICTLY NO FABRICATION.** This is financial data. If you CANNOT find a value from NSE/BSE/Screener, **SAY SO to the user** — do NOT invent, estimate, or carry forward a stale number. Wrong/stale price, 52-week range, or market cap is unacceptable.
+
+> **NEVER hardcode** price, 52-week high/low, market cap, or P/E. Always pull them fresh from the Screener key-points box on each run.
 
 Do NOT trust Yahoo Finance / generic aggregators for the core numbers.
 
@@ -51,7 +56,7 @@ curl -s "https://www.screener.in/api/company/<ID>/chart/?q=Price-DMA50-DMA200-Vo
 
 ### Key parsing rules (get these RIGHT)
 - **Quarterly YoY growth** = compare the **LAST column** to the **SAME QUARTER PRIOR YEAR** (4 columns back), NOT the previous quarter. Example: `Jun 2026` vs `Jun 2025`.
-- **Key points box** (price, P/E, ROE, ROCE, market cap) is an HTML `<div>`, not a `<table>` — parse with BeautifulSoup/regex, not `pd.read_html`.
+- **Key points box** (Current Price, High/Low, Market Cap, P/E, ROCE, ROE, Book Value, Dividend Yield) is an HTML `<ul id="top-ratios">` — parse with BeautifulSoup/regex, NOT `pd.read_html`. This is the **authoritative source** for price, 52-week high/low, market cap, and P/E. Parse it fresh every run — never reuse a stale value.
 - **Peers**: fetch each peer the same way (Screener API), compute YoY growth the same way.
 - **Price / DMA50 / DMA200 / 1Y return** — fetch from the chart API (numeric company id from search, e.g. `1284488`):
   ```bash
