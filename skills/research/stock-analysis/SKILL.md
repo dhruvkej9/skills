@@ -28,19 +28,23 @@ Use whenever the user wants a stock analyzed, a company researched for investing
 ## The One Command
 
 ```bash
-python3 scripts/stock_analysis.py "RELIANCE.NS" --out /path/to/report.pdf
+python3 scripts/stock_analysis.py "RELIANCE.NS" --out /path/to/report.pdf --peers "ONGC.NS,BPCL.NS,IOC.NS,GAIL.NS,OIL.NS"
 ```
 
 - Ticker format: Indian stocks use `.NS` (NSE) or `.BO` (BSE), e.g. `RELIANCE.NS`, `HDFCBANK.NS`. Global: `AAPL`, `TSLA`.
 - `--out` defaults to `stock_report_<TICKER>.pdf` in the current directory.
 - `--days` (default 365) controls the price-history window.
+- `--peers` (comma-separated tickers) adds a **sector peer comparison** table, ranked by revenue growth with the fastest company highlighted — the "fastest car" in the sector.
 
 ## What the report contains
 
-- **Header** — ticker, company name, exchange, currency, report date
-- **Price card** — current price, day change, 52-week high/low, market cap
+- **Header** — ticker, company name, sector, exchange, currency, report date
+- **Price card** — current price, day change, 52-week high/low, market cap, 1Y return
+- **Growth (Racing Car)** — YoY revenue & net-income growth, plus whether growth is *speeding up* or *slowing down* (acceleration)
+- **Margins** — gross, operating, net margin
 - **Fundamentals** — P/E, EPS, book value, dividend yield, ROE
-- **Technicals** — 50/200-day SMA, RSI(14), MACD, 1Y return
+- **Technicals** — 50/200-day SMA, RSI(14), 1Y return
+- **Sector Peer Comparison** — ranks peers by revenue growth, highlights the fastest
 - **Verdict** — data-driven buy/hold/sell signal with rationale
 - **Price chart** — 1-year close with 50/200-day SMA overlay (matplotlib)
 
