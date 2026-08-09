@@ -205,10 +205,13 @@ def render(d, out, peers=None):
         html = html.replace("{{THESIS}}", thesis_html)
         html = html.replace("{{THESIS_NOTE}}", research.get("thesis_note", ""))
 
-        # Sources & reference reports (links to PDFs used)
+        # Sources & reference reports (links to PDFs used) — make URLs clickable
         sources = research.get("sources") or []
         if sources:
-            s_html = "".join(f"<li>{s}</li>" for s in sources)
+            import re as _re
+            def _linkify(s):
+                return _re.sub(r'(https?://\S+)', r'<a href="\1">\1</a>', s)
+            s_html = "".join(f"<li>{_linkify(s)}</li>" for s in sources)
         else:
             s_html = "<li>No source links provided.</li>"
         html = html.replace("{{SOURCES}}", s_html)
