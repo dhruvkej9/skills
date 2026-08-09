@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.6.0
+version: 2.7.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -213,6 +213,8 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 > **COMPETITOR CONCALLS MUST BE ANALYZED TOO.** The report must analyze the **latest concall of EVERY competitor peer** (not just the target), sourced from BSE/Screener the same way. Add a **"Competitor Concall Analysis"** section listing each peer's latest concall summary + highlights + verbatim quotes. Use subagents (parallel) to fetch each peer's transcript from BSE — but verify the numbers yourself before they enter the report.
 >
 > **PEERS ARE AUTO-DETERMINED — DO NOT ASK THE USER.** The agent picks the peer set itself: same-sector, same-subsegment listed competitors (e.g. for a wires & cables company: Polycab, Havells, KEI, Finolex Cables). Resolve tickers correctly (Finolex **Cables** = FINCABLES; Finolex **Industries** = FINPIPE, pipes — NOT a cable peer). If a chosen ticker turns out to be the wrong company/segment, silently swap to the correct one and analyze it — do not ask the user which peers to use. The user decides nothing about peers; the agent decides and reports.
+>
+> **NEVER LEAVE PEER DATA NULL.** Every peer in the comparison table MUST have real `rev_growth` and `ni_growth` numbers pulled from Screener's quarterly table (Sales row and Profit-before-tax row, last column vs 4-back column; net profit = PBT × (1 − tax%)). A `null` peer cell is a broken report — the user should never see empty peer data. If a peer's Screener page fails to parse, retry or fail loudly; do not ship a report with blank peer cells.
 
 > **LIST EVERYTHING ANALYZED.** The report must explicitly list **every single thing analyzed**: each concall (target + all peers), each investor presentation, each results filing, each Screener data pull. Nothing analyzed should be silently omitted — the user wants full transparency of what went into the report.
 
