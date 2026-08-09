@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.1.0
+version: 2.2.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -53,6 +53,14 @@ curl -s "https://www.screener.in/api/company/<ID>/chart/?q=Price-DMA50-DMA200-Vo
 - **Quarterly YoY growth** = compare the **LAST column** to the **SAME QUARTER PRIOR YEAR** (4 columns back), NOT the previous quarter. Example: `Jun 2026` vs `Jun 2025`.
 - **Key points box** (price, P/E, ROE, ROCE, market cap) is an HTML `<div>`, not a `<table>` — parse with BeautifulSoup/regex, not `pd.read_html`.
 - **Peers**: fetch each peer the same way (Screener API), compute YoY growth the same way.
+- **Price / DMA50 / DMA200 / 1Y return** — fetch from the chart API (numeric company id from search, e.g. `1284488`):
+  ```bash
+  curl -s "https://www.screener.in/api/company/<NUMERIC_ID>/chart/?q=Price-DMA50-DMA200&days=365&consolidated=true" \
+    -H "Cookie: csrftoken=<CSRF>; sessionid=<SID>"
+  ```
+  Latest price = last value of the `Price` series. **Never hardcode a stale price** — always pull fresh from the chart API on each run.
+- **RSI(14)** — compute from the daily `Price` series (last 14 closes: `100 - 100/(1+avg_gain/avg_loss)`). Screener does not expose RSI directly.
+- **Chart image** — render the Price/DMA50/DMA200 series with matplotlib (`matplotlib.use('Agg')`), save PNG, set `chart_path` in research.json. This keeps the report's chart fresh too.
 
 ### Build `research.json` (single source of truth for the script)
 
@@ -119,7 +127,8 @@ curl -s "https://www.screener.in/api/company/<ID>/chart/?q=Price-DMA50-DMA200-Vo
   },
   "brutal": ["honest risk flag — do not sugarcoat"],
   "thesis": ["framework point 1", "framework point 2"],
-  "thesis_note": "optional: one-line thesis context"
+  "thesis_note": "optional: one-line thesis context",
+  "chart_path": "/path/to/price_chart.png"
 }
 ```
 
