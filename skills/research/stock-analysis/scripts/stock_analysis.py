@@ -109,6 +109,13 @@ def render(d, out, peers=None):
 
         research = d["research"]
 
+        # Future & Guidance — detailed guidance points from research
+        guidance = research.get("guidance") or {}
+        g_rows = ""
+        for k, v in guidance.items():
+            g_rows += f"<tr><td class='k'>{k}</td><td class='v'>{v}</td></tr>"
+        html = html.replace("{{GUIDANCE_ROWS}}", g_rows)
+
         # Concalls
         concalls = research.get("concalls") or []
         if concalls:
@@ -122,6 +129,17 @@ def render(d, out, peers=None):
             html = html.replace("{{CONCALLS}}", rows)
         else:
             html = html.replace("{{CONCALLS}}", "<p class='na'>No concall data provided in research.json.</p>")
+
+        # Exact quotes from concalls (verbatim, highlighted)
+        quotes = research.get("quotes") or []
+        if quotes:
+            q_html = ""
+            for q in quotes:
+                q_html += (f"<div class='quote'><div class='quote-q'>{q.get('speaker','')} "
+                           f"— {q.get('context','')}</div><div class='quote-t'>“{q.get('text','')}”</div></div>")
+            html = html.replace("{{CONCALL_QUOTES}}", q_html)
+        else:
+            html = html.replace("{{CONCALL_QUOTES}}", "<p class='na'>No verbatim quotes provided.</p>")
 
         # Latest results
         res = research.get("results")
@@ -186,6 +204,14 @@ def render(d, out, peers=None):
         thesis_html = "".join(f"<li>{t}</li>" for t in auto + list(thesis))
         html = html.replace("{{THESIS}}", thesis_html)
         html = html.replace("{{THESIS_NOTE}}", research.get("thesis_note", ""))
+
+        # Sources & reference reports (links to PDFs used)
+        sources = research.get("sources") or []
+        if sources:
+            s_html = "".join(f"<li>{s}</li>" for s in sources)
+        else:
+            s_html = "<li>No source links provided.</li>"
+        html = html.replace("{{SOURCES}}", s_html)
 
         # Chart: only if research provides a price-history image path
         chart_path = research.get("chart_path")

@@ -88,6 +88,12 @@
   .call-hl li { margin-bottom: 3px; }
   .na { color: #94a3b8; font-style: italic; font-size: 11.5px; }
 
+  /* ---- Exact quotes ---- */
+  .quotes { margin-top: 6px; }
+  .quote { border: 1px solid #fde68a; border-left: 4px solid #f59e0b; background: #fffbeb; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; page-break-inside: avoid; break-inside: avoid; }
+  .quote-q { font-weight: 700; color: #92400e; font-size: 12px; margin-bottom: 4px; }
+  .quote-t { font-size: 11px; color: #78350f; font-style: italic; line-height: 1.5; }
+
   .foot { text-align: center; color: #94a3b8; font-size: 9px; padding: 14px 0 0; }
 </style>
 </head>
@@ -126,6 +132,8 @@
       <table>
         <tbody>
           <tr><td class="k">ROCE</td><td class="v">{{ROCE}}</td></tr>
+          <tr><td class="k">ROE</td><td class="v">{{ROE}}</td></tr>
+          {{GUIDANCE_ROWS}}
         </tbody>
       </table>
     </div>
@@ -153,6 +161,11 @@
     <div class="section">
       <div class="title"><span class="bar"></span>Concall Analysis (Past 2+)</div><hr class="rule">
       <div class="calls">{{CONCALLS}}</div>
+    </div>
+
+    <div class="section">
+      <div class="title"><span class="bar"></span>Exact Quotes from Concalls</div><hr class="rule">
+      <div class="quotes">{{CONCALL_QUOTES}}</div>
     </div>
 
     <div class="section">
@@ -209,6 +222,10 @@
     <div class="section">
       <div class="title"><span class="bar"></span>Price Chart (1Y)</div><hr class="rule">
       <div class="chart"><img src="{{CHART}}"></div>
+    </div>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Sources &amp; Reference Reports</div><hr class="rule">
+      <ul class="reasons">{{SOURCES}}</ul>
     </div>
   </div>
 
