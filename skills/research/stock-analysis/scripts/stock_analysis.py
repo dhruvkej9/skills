@@ -226,7 +226,7 @@ def render(d, out, peers=None):
                     .replace("{{FWDEPS}}", _fmt(d["fwd_eps"]))
                     .replace("{{TARGET}}", _fmt(d["target"]))
                     .replace("{{UPSIDE}}", _pct((d["target"] / d["price"] - 1) * 100) if (d["target"] and d["price"]) else "—")
-                    .replace("{{RECO}}", (d["rec"] or "—").upper())
+                    .replace("{{RECO}}", {"strong_buy": "Strong Buy", "buy": "Buy", "hold": "Hold", "sell": "Sell", "strong_sell": "Strong Sell"}.get(d["rec"], (d["rec"] or "—").title()))
                     .replace("{{NANALYST}}", str(d["n_analyst"]) if d["n_analyst"] else "—")
                     .replace("{{EPS}}", _fmt(d["eps"]))
                     .replace("{{BOOK}}", _fmt(d["book"]))
