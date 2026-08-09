@@ -111,6 +111,12 @@ def fetch(ticker, days):
         "book": info.get("bookValue"),
         "div_yield": info.get("dividendYield"),
         "roe": info.get("returnOnEquity"),
+        # Future / guidance (analyst estimates)
+        "fwd_pe": info.get("forwardPE"),
+        "fwd_eps": info.get("forwardEps"),
+        "target": info.get("targetMeanPrice"),
+        "rec": info.get("recommendationKey"),
+        "n_analyst": info.get("numberOfAnalystOpinions"),
         "sma50": sma50, "sma200": sma200, "rsi": rsi,
         "ret1y": (price / float(close.iloc[0]) - 1) * 100 if len(close) > 1 else 0,
         "rev_growth": rev_g, "rev_accel": rev_acc, "rev_car": rev_car,
@@ -216,6 +222,12 @@ def render(d, out, peers=None):
                     .replace("{{LOW52}}", _fmt(d["low52"]))
                     .replace("{{MKTCAP}}", _fmt(d["mktcap"] / 1e7, " Cr") if d["mktcap"] else "—")
                     .replace("{{PE}}", _fmt(d["pe"]))
+                    .replace("{{FWDPE}}", _fmt(d["fwd_pe"]))
+                    .replace("{{FWDEPS}}", _fmt(d["fwd_eps"]))
+                    .replace("{{TARGET}}", _fmt(d["target"]))
+                    .replace("{{UPSIDE}}", _pct((d["target"] / d["price"] - 1) * 100) if (d["target"] and d["price"]) else "—")
+                    .replace("{{RECO}}", (d["rec"] or "—").upper())
+                    .replace("{{NANALYST}}", str(d["n_analyst"]) if d["n_analyst"] else "—")
                     .replace("{{EPS}}", _fmt(d["eps"]))
                     .replace("{{BOOK}}", _fmt(d["book"]))
                     .replace("{{DIV}}", _pct(d["div_yield"] * 100) if (d["div_yield"] and d["div_yield"] < 0.1) else (_pct(d["div_yield"]) if d["div_yield"] else "—"))

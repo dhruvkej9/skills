@@ -34,7 +34,7 @@
   .body { padding: 26px 44px 20px; }
 
   /* ---- Metric cards ---- */
-  .grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; page-break-inside: avoid; break-inside: avoid; }
   .card {
     flex: 1 1 30%; min-width: 150px; border-radius: 12px; padding: 14px 16px;
     background: #fff; border: 1px solid #e2e8f0;
@@ -46,8 +46,8 @@
   .card .val.up { color: #16a34a; }
   .card .val.down { color: #dc2626; }
 
-  /* ---- Section headers ---- */
-  .section { margin: 26px 0 12px; }
+  /* ---- Section (title + table kept together) ---- */
+  .section { margin: 26px 0 0; page-break-inside: avoid; break-inside: avoid; }
   .section .title {
     font-size: 15px; font-weight: 800; color: #1e3a8a; letter-spacing: .3px;
     display: flex; align-items: center; gap: 8px;
@@ -66,11 +66,11 @@
   thead td { background: #eef2ff; color: #1e3a8a; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
 
   /* ---- Chart ---- */
-  .chart { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; background: #fff; }
+  .chart { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; background: #fff; page-break-inside: avoid; break-inside: avoid; }
   .chart img { width: 100%; border-radius: 8px; }
 
   /* ---- Rationale ---- */
-  .reasons { font-size: 12px; color: #475569; margin-top: 6px; padding-left: 20px; }
+  .reasons { font-size: 12px; color: #475569; margin-top: 6px; padding-left: 20px; page-break-inside: avoid; break-inside: avoid; }
   .reasons li { margin-bottom: 5px; }
   .reasons li::marker { color: #2563eb; }
 
@@ -95,58 +95,86 @@
       <div class="card"><div class="label">1Y Return</div><div class="val">{{RET1Y}}</div></div>
     </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Growth (Racing Car)</div><hr class="rule"></div>
-    <table>
-      <tbody>
-        <tr><td class="k">Revenue Growth (YoY)</td><td class="v">{{REVGROWTH}}</td></tr>
-        <tr><td class="k">Revenue Momentum</td><td class="v">{{REVCAR}}</td></tr>
-        <tr><td class="k">Net Income Growth (YoY)</td><td class="v">{{NIGROWTH}}</td></tr>
-        <tr><td class="k">Profit Momentum</td><td class="v">{{NICAR}}</td></tr>
-      </tbody>
-    </table>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Growth (Racing Car)</div><hr class="rule">
+      <table>
+        <tbody>
+          <tr><td class="k">Revenue Growth (YoY)</td><td class="v">{{REVGROWTH}}</td></tr>
+          <tr><td class="k">Revenue Momentum</td><td class="v">{{REVCAR}}</td></tr>
+          <tr><td class="k">Net Income Growth (YoY)</td><td class="v">{{NIGROWTH}}</td></tr>
+          <tr><td class="k">Profit Momentum</td><td class="v">{{NICAR}}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Margins</div><hr class="rule"></div>
-    <table>
-      <tbody>
-        <tr><td class="k">Gross Margin</td><td class="v">{{GROSSM}}</td></tr>
-        <tr><td class="k">Operating Margin</td><td class="v">{{OPM}}</td></tr>
-        <tr><td class="k">Net Margin</td><td class="v">{{NETM}}</td></tr>
-      </tbody>
-    </table>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Future &amp; Guidance</div><hr class="rule">
+      <table>
+        <tbody>
+          <tr><td class="k">Forward P/E</td><td class="v">{{FWDPE}}</td></tr>
+          <tr><td class="k">Forward EPS (est.)</td><td class="v">{{FWDEPS}}</td></tr>
+          <tr><td class="k">Analyst Target Price</td><td class="v">{{TARGET}}</td></tr>
+          <tr><td class="k">Upside to Target</td><td class="v">{{UPSIDE}}</td></tr>
+          <tr><td class="k">Analyst Consensus</td><td class="v">{{RECO}}</td></tr>
+          <tr><td class="k"># Analyst Opinions</td><td class="v">{{NANALYST}}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Fundamentals</div><hr class="rule"></div>
-    <table>
-      <tbody>
-        <tr><td class="k">P/E Ratio</td><td class="v">{{PE}}</td></tr>
-        <tr><td class="k">EPS</td><td class="v">{{EPS}}</td></tr>
-        <tr><td class="k">Book Value</td><td class="v">{{BOOK}}</td></tr>
-        <tr><td class="k">Dividend Yield</td><td class="v">{{DIV}}</td></tr>
-        <tr><td class="k">Return on Equity</td><td class="v">{{ROE}}</td></tr>
-      </tbody>
-    </table>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Margins</div><hr class="rule">
+      <table>
+        <tbody>
+          <tr><td class="k">Gross Margin</td><td class="v">{{GROSSM}}</td></tr>
+          <tr><td class="k">Operating Margin</td><td class="v">{{OPM}}</td></tr>
+          <tr><td class="k">Net Margin</td><td class="v">{{NETM}}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Technicals</div><hr class="rule"></div>
-    <table>
-      <tbody>
-        <tr><td class="k">50-Day SMA</td><td class="v">{{SMA50}}</td></tr>
-        <tr><td class="k">200-Day SMA</td><td class="v">{{SMA200}}</td></tr>
-        <tr><td class="k">RSI (14)</td><td class="v">{{RSI}}</td></tr>
-      </tbody>
-    </table>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Fundamentals</div><hr class="rule">
+      <table>
+        <tbody>
+          <tr><td class="k">P/E Ratio</td><td class="v">{{PE}}</td></tr>
+          <tr><td class="k">EPS</td><td class="v">{{EPS}}</td></tr>
+          <tr><td class="k">Book Value</td><td class="v">{{BOOK}}</td></tr>
+          <tr><td class="k">Dividend Yield</td><td class="v">{{DIV}}</td></tr>
+          <tr><td class="k">Return on Equity</td><td class="v">{{ROE}}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Sector Peer Comparison (Fastest Car)</div><hr class="rule"></div>
-    <table>
-      <thead><tr><td>#</td><td>Company</td><td>Rev Growth</td><td>Net Inc Growth</td></tr></thead>
-      <tbody>
-        {{PEERS}}
-      </tbody>
-    </table>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Technicals</div><hr class="rule">
+      <table>
+        <tbody>
+          <tr><td class="k">50-Day SMA</td><td class="v">{{SMA50}}</td></tr>
+          <tr><td class="k">200-Day SMA</td><td class="v">{{SMA200}}</td></tr>
+          <tr><td class="k">RSI (14)</td><td class="v">{{RSI}}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Price Chart (1Y)</div><hr class="rule"></div>
-    <div class="chart"><img src="{{CHART}}"></div>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Sector Peer Comparison (Fastest Car)</div><hr class="rule">
+      <table>
+        <thead><tr><td>#</td><td>Company</td><td>Rev Growth</td><td>Net Inc Growth</td></tr></thead>
+        <tbody>
+          {{PEERS}}
+        </tbody>
+      </table>
+    </div>
 
-    <div class="section"><div class="title"><span class="bar"></span>Rationale</div><hr class="rule"></div>
-    <ul class="reasons">{{REASONS}}</ul>
+    <div class="section">
+      <div class="title"><span class="bar"></span>Price Chart (1Y)</div><hr class="rule">
+      <div class="chart"><img src="{{CHART}}"></div>
+    </div>
+
+    <div class="section">
+      <div class="title"><span class="bar"></span>Rationale</div><hr class="rule">
+      <ul class="reasons">{{REASONS}}</ul>
+    </div>
   </div>
 
   <div class="foot">Generated by Hermes Agent · Data: Yahoo Finance · Not investment advice</div>
