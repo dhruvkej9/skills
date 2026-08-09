@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.3.0
+version: 2.4.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -29,6 +29,19 @@ Analyze any stock (NSE/BSE) and produce a **beautiful PDF report** covering pric
 > **NEVER hardcode** price, 52-week high/low, market cap, or P/E. Always pull them fresh from the Screener key-points box on each run.
 
 Do NOT trust Yahoo Finance / generic aggregators for the core numbers.
+
+---
+
+## Concall transcript sourcing — STRICT ORDER (no silent 3rd-party fallback)
+
+For **concall transcripts / quotes**, follow this order and **STOP to ask the user** if a step fails:
+
+1. **Screener.in** — check the company's Screener page for concall/transcript links (some companies publish them there).
+2. **BSE / NSE** — official filings & announcements (Regulation 30 filings) often link the earnings-call audio/transcript.
+3. **Company IR page** — investor events / transcripts section.
+4. **THEN STOP — ASK THE USER.** Do NOT silently jump to a 3rd-party aggregator (AlphaStreet, TipRanks, stockanalysis.com, etc.). If you need a 3rd-party source, **ask the user first** how they want to resolve it (e.g. "Transcript not on Screener/BSE/NSE/IR — OK to use AlphaStreet, or do you have the PDF?"). The user decides.
+
+> **Why:** the user explicitly wants primary sources (Screener/BSE/NSE) first. Silently pulling quotes from AlphaStreet is NOT acceptable. If the primary sources fail, ask — don't guess.
 
 ---
 
@@ -198,10 +211,11 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 2. **Fetch real data from Screener.in** (authenticated session) — fundamentals, quarterly YoY growth, ratios, price. Do the same for each peer.
 3. **Research phase (web):**
    a. BSE/NSE filings + company IR → latest results, concalls, investor presentation.
-   b. Extract revenue/PAT/margins, concall summary + highlights, **verbatim management quotes** (exact wording for the `quotes` array), **detailed guidance** (volume, margin, capex, FMEG, etc. for the `guidance` dict).
-   c. Write the `brutal` risk list + `thesis` framework points.
-   d. Collect **source links** — company IR, AlphaStreet transcript, BSE filing PDFs, Screener peer pages — into the `sources` array (real URLs, not labels).
-   e. Save everything to `research.json`.
+   b. **Source the concall transcript in STRICT order: Screener → BSE/NSE → IR. If all fail, ASK the user** (never silently use AlphaStreet/3rd party).
+   c. Extract revenue/PAT/margins, concall summary + highlights, **verbatim management quotes** (exact wording for the `quotes` array), **detailed guidance** (volume, margin, capex, FMEG, etc. for the `guidance` dict).
+   d. Write the `brutal` risk list + `thesis` framework points.
+   e. Collect **source links** — company IR, AlphaStreet transcript, BSE filing PDFs, Screener peer pages — into the `sources` array (real URLs, not labels).
+   f. Save everything to `research.json`.
 4. **Generate:** run the script with ticker + `--research research.json`.
 5. **Deliver:** send the PDF via `MEDIA:/path/to/report.pdf` on WhatsApp.
 6. **Summarize:** 2-3 lines — key data points + top brutal risk + one highlight.
@@ -219,6 +233,7 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 - **html5lib missing** — `pip install html5lib` (needed for `pd.read_html`).
 - **Sources must be real links** — put actual URLs in the `sources` array, not labels like "company IR". The script auto-linkifies any `http(s)://` in the list.
 - **Quotes must be verbatim** — copy the exact wording from the transcript, don't paraphrase. If you can't get the exact text, omit the quote rather than invent it.
+- **NEVER silently use 3rd-party transcripts** — source concall from Screener → BSE/NSE → IR first. If none have it, ASK the user before using AlphaStreet/TipRanks/stockanalysis.
 
 ---
 
