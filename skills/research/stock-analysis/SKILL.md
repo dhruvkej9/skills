@@ -208,6 +208,8 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 16. **Sources & Reference Reports** — every PDF/report used, as **clickable links** (URLs auto-linkified in the script)
 
 > **COMPETITOR CONCALLS MUST BE ANALYZED TOO.** The report must analyze the **latest concall of EVERY competitor peer** (not just the target), sourced from BSE/Screener the same way. Add a **"Competitor Concall Analysis"** section listing each peer's latest concall summary + highlights + verbatim quotes. Use subagents (parallel) to fetch each peer's transcript from BSE — but verify the numbers yourself before they enter the report.
+>
+> **PEERS ARE AUTO-DETERMINED — DO NOT ASK THE USER.** The agent picks the peer set itself: same-sector, same-subsegment listed competitors (e.g. for a wires & cables company: Polycab, Havells, KEI, Finolex Cables). Resolve tickers correctly (Finolex **Cables** = FINCABLES; Finolex **Industries** = FINPIPE, pipes — NOT a cable peer). If a chosen ticker turns out to be the wrong company/segment, silently swap to the correct one and analyze it — do not ask the user which peers to use. The user decides nothing about peers; the agent decides and reports.
 
 > **LIST EVERYTHING ANALYZED.** The report must explicitly list **every single thing analyzed**: each concall (target + all peers), each investor presentation, each results filing, each Screener data pull. Nothing analyzed should be silently omitted — the user wants full transparency of what went into the report.
 
