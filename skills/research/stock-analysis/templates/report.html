@@ -60,7 +60,11 @@
   tr { border-radius: 8px; }
   td { padding: 8px 12px; }
   tbody tr:nth-child(even) { background: #f8fafc; }
-  tr.fastest td { background: #ecfdf5 !important; color: #065f46; font-weight: 700; }
+  tr.fastest td { background: #ecfdf5; color: #065f46; font-weight: bold; }
+  tr.target td { background: #eff6ff; color: #1e3a8a; font-weight: 700; }
+  .tag { background: #1e3a8a; color: #fff; font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 700; letter-spacing: .5px; vertical-align: middle; }
+  .peer-note { font-size: 10.5px; color: #64748b; margin: 2px 0 8px; line-height: 1.4; }
+  .thesis-note { font-size: 11px; color: #64748b; margin-top: 8px; font-style: italic; line-height: 1.45; }
   td.k { color: #64748b; width: 45%; }
   td.v { font-weight: 700; text-align: right; color: #0f172a; }
   thead td { background: #eef2ff; color: #1e3a8a; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
@@ -132,6 +136,12 @@
     </div>
 
     <div class="section">
+      <div class="title"><span class="bar"></span>Thesis — Momentum &amp; Growth Check</div><hr class="rule">
+      <ul class="reasons">{{THESIS}}</ul>
+      <p class="thesis-note">{{THESIS_NOTE}}</p>
+    </div>
+
+    <div class="section">
       <div class="title"><span class="bar"></span>Brutal Honesty &amp; Risks</div><hr class="rule">
       <ul class="reasons">{{BRUTAL}}</ul>
     </div>
@@ -191,7 +201,8 @@
     </div>
 
     <div class="section">
-      <div class="title"><span class="bar"></span>Sector Peer Comparison (Fastest Car)</div><hr class="rule">
+      <div class="title"><span class="bar"></span>Sector Peer Comparison — Fastest Car</div><hr class="rule">
+      <p class="peer-note">Ranked by <b>revenue growth</b> (Gaadi-ka-Speed). ★ = target. Green row = fastest revenue grower. Net-income growth shown for context only — a negative number there does NOT mean the car is slow; revenue pace decides the ranking.</p>
       <table>
         <thead><tr><td>#</td><td>Company</td><td>Rev Growth</td><td>Net Inc Growth</td></tr></thead>
         <tbody>

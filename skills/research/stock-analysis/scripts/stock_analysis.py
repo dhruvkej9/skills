@@ -295,16 +295,35 @@ def render(d, out, peers=None):
             brutal.append("No explicit risk flags from research. This is NOT a clean bill of health — it means the data provided was thin. Dig into guidance, capex, and competitive moat before acting.")
         html = html.replace("{{BRUTAL}}", "".join(f"<li>{b}</li>" for b in brutal))
 
-        # Peer table
+        # Peer table — always include the TARGET as row 0 so it's in the "cars" list
+        target_row = (f"<tr class='target'><td>★</td><td>{d['name']} ({d['ticker']}) <span class='tag'>TARGET</span></td>"
+                      f"<td>{_pct(d['rev_growth'])}</td><td>{_pct(d['ni_growth'])}</td></tr>")
         if peers:
-            rows = ""
+            rows = target_row
             for i, p in enumerate(peers, 1):
                 cls = ' class="fastest"' if i == 1 and p["rev_growth"] is not None else ""
                 rows += (f"<tr{cls}><td>{i}</td><td>{p['name']} ({p['ticker']})</td>"
                          f"<td>{_pct(p['rev_growth'])}</td><td>{_pct(p['ni_growth'])}</td></tr>")
             html = html.replace("{{PEERS}}", rows)
         else:
-            html = html.replace("{{PEERS}}", "<tr><td colspan=4>No peers supplied. Pass --peers TICKER,TICKER to compare.</td></tr>")
+            html = html.replace("{{PEERS}", target_row)
+
+        # ---- Thesis (Momentum & Growth framework) ----
+        thesis = research.get("thesis") or []
+        # Auto: Gaadi-ka-Speed verdict from growth acceleration
+        rev_car_txt = d["rev_car"][1]
+        speed = "ACCELERATING (speeding up)" if "SPEEDING" in rev_car_txt else ("DECELERATING (slowing)" if "SLOWING" in rev_car_txt else "FLAT / UNCLEAR")
+        auto = [f"Gaadi-ka-Speed (sales growth pace): {speed} — {d['rev_car'][0]}"]
+        if d["rev_growth"] is not None and d["rev_growth"] >= 15:
+            auto.append("Growth velocity strong (≥15% YoY) — passes the momentum bar.")
+        elif d["rev_growth"] is not None and d["rev_growth"] < 0:
+            auto.append("Growth velocity NEGATIVE — fails the momentum bar. Stock unlikely to reward under this framework.")
+        else:
+            auto.append("Growth velocity modest (<15%) — below the framework's preferred pace.")
+        thesis_html = "".join(f"<li>{t}</li>" for t in auto + list(thesis))
+        html = html.replace("{{THESIS}}", thesis_html)
+        html = html.replace("{{THESIS_NOTE}}", research.get("thesis_note", ""))
+
         HTML(string=html, base_url=td).write_pdf(out)
 
 
