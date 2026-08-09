@@ -13,41 +13,79 @@
   }
   * { box-sizing: border-box; }
   body { font-family: 'DejaVu Sans', sans-serif; color: #1e293b; margin: 0; }
-  .header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 28px 40px; }
-  .header h1 { margin: 0; font-size: 26px; }
-  .header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
-  .body { padding: 28px 40px; }
-  .verdict { display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: 700; font-size: 15px; }
-  .verdict.BUY  { background: #dcfce7; color: #15803d; }
-  .verdict.SELL { background: #fee2e2; color: #b91c1c; }
-  .verdict.HOLD { background: #fef9c3; color: #a16207; }
-  .grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-  .card { flex: 1 1 30%; min-width: 150px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
-  .card .label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: #64748b; }
-  .card .val { font-size: 20px; font-weight: 700; margin-top: 4px; }
-  .card .val.up { color: #15803d; }
-  .card .val.down { color: #b91c1c; }
-  h2 { font-size: 15px; color: #1e3a8a; margin: 24px 0 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; }
-  tr.fastest td { background: #ecfdf5; color: #065f46; font-weight: bold; }
+
+  /* ---- Hero ---- */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+    color: #fff; padding: 34px 44px 30px; position: relative;
+    border-bottom: 4px solid #f59e0b;
+  }
+  .hero .kicker { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #93c5fd; margin-bottom: 6px; }
+  .hero h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: .3px; }
+  .hero .sub { opacity: .9; font-size: 13px; margin-top: 6px; color: #dbeafe; }
+  .hero .verdict {
+    display: inline-block; margin-top: 14px; padding: 7px 22px; border-radius: 24px;
+    font-weight: 800; font-size: 16px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .verdict.BUY  { background: linear-gradient(135deg,#16a34a,#22c55e); color:#fff; box-shadow:0 3px 12px rgba(34,197,94,.4); }
+  .verdict.SELL { background: linear-gradient(135deg,#dc2626,#ef4444); color:#fff; box-shadow:0 3px 12px rgba(239,68,68,.4); }
+  .verdict.HOLD { background: linear-gradient(135deg,#d97706,#f59e0b); color:#fff; box-shadow:0 3px 12px rgba(245,158,11,.4); }
+
+  .body { padding: 26px 44px 20px; }
+
+  /* ---- Metric cards ---- */
+  .grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .card {
+    flex: 1 1 30%; min-width: 150px; border-radius: 12px; padding: 14px 16px;
+    background: #fff; border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(15,23,42,.06);
+    border-top: 3px solid #2563eb;
+  }
+  .card .label { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: #64748b; }
+  .card .val { font-size: 21px; font-weight: 800; margin-top: 4px; color: #0f172a; }
+  .card .val.up { color: #16a34a; }
+  .card .val.down { color: #dc2626; }
+
+  /* ---- Section headers ---- */
+  .section { margin: 26px 0 12px; }
+  .section .title {
+    font-size: 15px; font-weight: 800; color: #1e3a8a; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section .bar { width: 6px; height: 16px; border-radius: 3px; background: linear-gradient(#2563eb,#7c3aed); }
+  .section .rule { border: none; border-top: 1px solid #e2e8f0; margin: 8px 0 0; }
+
+  /* ---- Tables ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+  tr { border-radius: 8px; }
+  td { padding: 8px 12px; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tr.fastest td { background: #ecfdf5 !important; color: #065f46; font-weight: 700; }
   td.k { color: #64748b; width: 45%; }
-  td.v { font-weight: 600; text-align: right; }
-  .chart { margin-top: 14px; }
-  .chart img { width: 100%; border-radius: 10px; }
-  .reasons { font-size: 12px; color: #475569; margin-top: 8px; padding-left: 18px; }
-  .reasons li { margin-bottom: 4px; }
-  .foot { text-align: center; color: #94a3b8; font-size: 9px; padding: 16px 40px 24px; }
+  td.v { font-weight: 700; text-align: right; color: #0f172a; }
+  thead td { background: #eef2ff; color: #1e3a8a; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ---- Chart ---- */
+  .chart { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; background: #fff; }
+  .chart img { width: 100%; border-radius: 8px; }
+
+  /* ---- Rationale ---- */
+  .reasons { font-size: 12px; color: #475569; margin-top: 6px; padding-left: 20px; }
+  .reasons li { margin-bottom: 5px; }
+  .reasons li::marker { color: #2563eb; }
+
+  .foot { text-align: center; color: #94a3b8; font-size: 9px; padding: 18px 44px 26px; }
 </style>
 </head>
 <body>
-  <div class="header">
+  <div class="hero">
+    <div class="kicker">Equity Research Report</div>
     <h1>{{NAME}}</h1>
     <div class="sub">{{TICKER}} · {{SECTOR}} · {{CURRENCY}} · Report date {{DATE}}</div>
-  </div>
-  <div class="body">
     <div class="verdict {{VERDICT}}">{{VERDICT}}</div>
+  </div>
 
+  <div class="body">
     <div class="grid">
       <div class="card"><div class="label">Current Price</div><div class="val">{{PRICE}}</div></div>
       <div class="card"><div class="label">Day Change</div><div class="val up">{{DAYCHG}}</div></div>
@@ -57,49 +95,60 @@
       <div class="card"><div class="label">1Y Return</div><div class="val">{{RET1Y}}</div></div>
     </div>
 
-    <h2>Growth (Racing Car)</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Growth (Racing Car)</div><hr class="rule"></div>
     <table>
-      <tr><td class="k">Revenue Growth (YoY)</td><td class="v">{{REVGROWTH}}</td></tr>
-      <tr><td class="k">Revenue Momentum</td><td class="v">{{REVCAR}}</td></tr>
-      <tr><td class="k">Net Income Growth (YoY)</td><td class="v">{{NIGROWTH}}</td></tr>
-      <tr><td class="k">Profit Momentum</td><td class="v">{{NICAR}}</td></tr>
+      <tbody>
+        <tr><td class="k">Revenue Growth (YoY)</td><td class="v">{{REVGROWTH}}</td></tr>
+        <tr><td class="k">Revenue Momentum</td><td class="v">{{REVCAR}}</td></tr>
+        <tr><td class="k">Net Income Growth (YoY)</td><td class="v">{{NIGROWTH}}</td></tr>
+        <tr><td class="k">Profit Momentum</td><td class="v">{{NICAR}}</td></tr>
+      </tbody>
     </table>
 
-    <h2>Margins</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Margins</div><hr class="rule"></div>
     <table>
-      <tr><td class="k">Gross Margin</td><td class="v">{{GROSSM}}</td></tr>
-      <tr><td class="k">Operating Margin</td><td class="v">{{OPM}}</td></tr>
-      <tr><td class="k">Net Margin</td><td class="v">{{NETM}}</td></tr>
+      <tbody>
+        <tr><td class="k">Gross Margin</td><td class="v">{{GROSSM}}</td></tr>
+        <tr><td class="k">Operating Margin</td><td class="v">{{OPM}}</td></tr>
+        <tr><td class="k">Net Margin</td><td class="v">{{NETM}}</td></tr>
+      </tbody>
     </table>
 
-    <h2>Fundamentals</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Fundamentals</div><hr class="rule"></div>
     <table>
-      <tr><td class="k">P/E Ratio</td><td class="v">{{PE}}</td></tr>
-      <tr><td class="k">EPS</td><td class="v">{{EPS}}</td></tr>
-      <tr><td class="k">Book Value</td><td class="v">{{BOOK}}</td></tr>
-      <tr><td class="k">Dividend Yield</td><td class="v">{{DIV}}</td></tr>
-      <tr><td class="k">Return on Equity</td><td class="v">{{ROE}}</td></tr>
+      <tbody>
+        <tr><td class="k">P/E Ratio</td><td class="v">{{PE}}</td></tr>
+        <tr><td class="k">EPS</td><td class="v">{{EPS}}</td></tr>
+        <tr><td class="k">Book Value</td><td class="v">{{BOOK}}</td></tr>
+        <tr><td class="k">Dividend Yield</td><td class="v">{{DIV}}</td></tr>
+        <tr><td class="k">Return on Equity</td><td class="v">{{ROE}}</td></tr>
+      </tbody>
     </table>
 
-    <h2>Technicals</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Technicals</div><hr class="rule"></div>
     <table>
-      <tr><td class="k">50-Day SMA</td><td class="v">{{SMA50}}</td></tr>
-      <tr><td class="k">200-Day SMA</td><td class="v">{{SMA200}}</td></tr>
-      <tr><td class="k">RSI (14)</td><td class="v">{{RSI}}</td></tr>
+      <tbody>
+        <tr><td class="k">50-Day SMA</td><td class="v">{{SMA50}}</td></tr>
+        <tr><td class="k">200-Day SMA</td><td class="v">{{SMA200}}</td></tr>
+        <tr><td class="k">RSI (14)</td><td class="v">{{RSI}}</td></tr>
+      </tbody>
     </table>
 
-    <h2>Sector Peer Comparison (Fastest Car)</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Sector Peer Comparison (Fastest Car)</div><hr class="rule"></div>
     <table>
-      <tr><td class="k">#</td><td class="k">Company</td><td class="k">Rev Growth</td><td class="k">Net Inc Growth</td></tr>
-      {{PEERS}}
+      <thead><tr><td>#</td><td>Company</td><td>Rev Growth</td><td>Net Inc Growth</td></tr></thead>
+      <tbody>
+        {{PEERS}}
+      </tbody>
     </table>
 
-    <h2>Price Chart (1Y)</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Price Chart (1Y)</div><hr class="rule"></div>
     <div class="chart"><img src="{{CHART}}"></div>
 
-    <h2>Rationale</h2>
+    <div class="section"><div class="title"><span class="bar"></span>Rationale</div><hr class="rule"></div>
     <ul class="reasons">{{REASONS}}</ul>
   </div>
+
   <div class="foot">Generated by Hermes Agent · Data: Yahoo Finance · Not investment advice</div>
 </body>
 </html>
