@@ -141,6 +141,30 @@ def render(d, out, peers=None):
         else:
             html = html.replace("{{CONCALL_QUOTES}}", "<p class='na'>No verbatim quotes provided.</p>")
 
+        # Competitor concall analysis (each peer's latest concall)
+        peer_calls = research.get("peer_concalls") or []
+        if peer_calls:
+            pc_html = ""
+            for pc in peer_calls:
+                hl = "".join(f"<li>{h}</li>" for h in pc.get("highlights", []))
+                qs = "".join(f"<li><i>{q.get('speaker','')}</i> — “{q.get('text','')}”</li>"
+                             for q in pc.get("quotes", []))
+                pc_html += (f"<div class='call'><div class='call-h'>{pc.get('name','')} "
+                            f"({pc.get('quarter','')})</div><div class='call-d'>{pc.get('date','')} · {pc.get('source','')}</div>"
+                            f"<div class='call-s'>{pc.get('summary','')}</div>"
+                            f"<ul class='call-hl'>{hl}{qs}</ul></div>")
+            html = html.replace("{{PEER_CONCALLS}}", pc_html)
+        else:
+            html = html.replace("{{PEER_CONCALLS}}", "<p class='na'>No competitor concall data provided.</p>")
+
+        # Everything analyzed (full transparency list)
+        analyzed = research.get("analyzed") or []
+        if analyzed:
+            a_html = "".join(f"<li>{a}</li>" for a in analyzed)
+        else:
+            a_html = "<li>No analysis log provided.</li>"
+        html = html.replace("{{ANALYZED}}", a_html)
+
         # Latest results
         res = research.get("results")
         if res:

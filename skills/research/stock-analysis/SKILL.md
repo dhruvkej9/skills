@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.4.0
+version: 2.5.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -36,12 +36,17 @@ Do NOT trust Yahoo Finance / generic aggregators for the core numbers.
 
 For **concall transcripts / quotes**, follow this order and **STOP to ask the user** if a step fails:
 
-1. **Screener.in** — check the company's Screener page for concall/transcript links (some companies publish them there).
-2. **BSE / NSE** — official filings & announcements (Regulation 30 filings) often link the earnings-call audio/transcript.
+1. **Screener.in** — the company's Screener page has a **"Concalls" section** (`<ul class="list-links">`) with a dated list of earnings calls. Each entry has:
+   - **Transcript** link → `https://www.bseindia.com/stockinfo/AnnPdfOpen.aspx?Pname=<uuid>.pdf` (official BSE Regulation 30 filing)
+   - **REC** link → company IR audio (`.mp3` on the company website)
+   - Parse these with regex: `<div class="ink-600...">Jul 2026</div>...href="(https://www.bseindia.com/...)" title="Raw Transcript"`. Pick the **latest** date. **This is how you get the real transcript — the data IS there.**
+2. **BSE / NSE** — official filings & announcements (Regulation 30 filings) link the earnings-call audio/transcript.
 3. **Company IR page** — investor events / transcripts section.
-4. **THEN STOP — ASK THE USER.** Do NOT silently jump to a 3rd-party aggregator (AlphaStreet, TipRanks, stockanalysis.com, etc.). If you need a 3rd-party source, **ask the user first** how they want to resolve it (e.g. "Transcript not on Screener/BSE/NSE/IR — OK to use AlphaStreet, or do you have the PDF?"). The user decides.
+4. **THEN STOP — ASK THE USER.** Do NOT silently jump to a 3rd-party aggregator (AlphaStreet, TipRanks, stockanalysis.com, etc.). If you need a 3rd-party source, **ask the user first**.
 
 > **Why:** the user explicitly wants primary sources (Screener/BSE/NSE) first. Silently pulling quotes from AlphaStreet is NOT acceptable. If the primary sources fail, ask — don't guess.
+
+> **⚠️ EXTRACTION PITFALL:** Screener/BSE/NSE **DO have the transcripts** — if you "can't find" them, your extraction is broken, not the data. The Screener page's Concalls section is the key: it links every BSE transcript. Always parse it before concluding the transcript is unavailable.
 
 ---
 
@@ -201,6 +206,10 @@ python3 scripts/stock_analysis.py "RRKABEL.NS" \
 14. **Thesis** — Momentum & Growth framework check
 15. **Price chart** — 1-year close with 50/200-day SMA overlay (only if `research.json` provides a `chart_path`)
 16. **Sources & Reference Reports** — every PDF/report used, as **clickable links** (URLs auto-linkified in the script)
+
+> **COMPETITOR CONCALLS MUST BE ANALYZED TOO.** The report must analyze the **latest concall of EVERY competitor peer** (not just the target), sourced from BSE/Screener the same way. Add a **"Competitor Concall Analysis"** section listing each peer's latest concall summary + highlights + verbatim quotes. Use subagents (parallel) to fetch each peer's transcript from BSE — but verify the numbers yourself before they enter the report.
+
+> **LIST EVERYTHING ANALYZED.** The report must explicitly list **every single thing analyzed**: each concall (target + all peers), each investor presentation, each results filing, each Screener data pull. Nothing analyzed should be silently omitted — the user wants full transparency of what went into the report.
 
 > **NO verdict / buy-sell / analyst consensus / target price.** This is a pure data report. The user does not want investment opinions.
 
