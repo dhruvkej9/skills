@@ -246,6 +246,55 @@ def render(d, out, peers=None):
                     .replace("{{VERDICT}}", v))
         reasons_html = "".join(f"<li>{r}</li>" for r in reasons)
         html = html.replace("{{REASONS}}", reasons_html)
+
+        # ---- Research sections (concall / PPT / results) ----
+        research = d.get("research") or {}
+        # Concalls
+        concalls = research.get("concalls") or []
+        if concalls:
+            rows = ""
+            for c in concalls:
+                hl = "".join(f"<li>{h}</li>" for h in c.get("highlights", []))
+                rows += (f"<div class='call'><div class='call-h'>{c.get('quarter','')} "
+                         f"<span class='call-d'>({c.get('date','')})</span></div>"
+                         f"<div class='call-s'>{c.get('summary','')}</div>"
+                         f"<ul class='call-hl'>{hl}</ul></div>")
+            html = html.replace("{{CONCALLS}}", rows)
+        else:
+            html = html.replace("{{CONCALLS}}", "<p class='na'>No concall data provided. Pass --research research.json.</p>")
+        # Latest results
+        res = research.get("results")
+        if res:
+            rows = (f"<tr><td class='k'>Quarter</td><td class='v'>{res.get('quarter','—')}</td></tr>"
+                    f"<tr><td class='k'>Revenue</td><td class='v'>{res.get('revenue','—')}</td></tr>"
+                    f"<tr><td class='k'>Profit</td><td class='v'>{res.get('profit','—')}</td></tr>"
+                    f"<tr><td class='k'>Margin</td><td class='v'>{res.get('margin','—')}</td></tr>")
+            html = html.replace("{{RESULTS}}", rows)
+        else:
+            html = html.replace("{{RESULTS}}", "<tr><td colspan=2 class='na'>No results provided. Pass --research research.json.</td></tr>")
+        # Presentation
+        pres = research.get("presentation")
+        if pres:
+            hl = "".join(f"<li>{h}</li>" for h in pres.get("highlights", []))
+            html = html.replace("{{PRES_TITLE}}", pres.get("title", "Investor Presentation"))
+            html = html.replace("{{PRES_HL}}", hl)
+        else:
+            html = html.replace("{{PRES_TITLE}}", "Investor Presentation")
+            html = html.replace("{{PRES_HL}}", "<li>No presentation data provided.</li>")
+
+        # Brutal honesty: explicit points from research + auto-generated data-driven ones
+        brutal = list(research.get("brutal") or [])
+        # Auto: flag data discrepancy between yfinance trailing growth and reported guidance
+        if d["rev_growth"] is not None and d["rev_growth"] < 0:
+            brutal.append(f"DATA WARNING: trailing revenue growth from financials is {d['rev_growth']:.1f}% (negative) — this conflicts with management-reported growth. Verify the reporting period before trusting either number.")
+        if d["rsi"] is not None and d["rsi"] > 70:
+            brutal.append(f"RSI {d['rsi']:.0f} — overbought; short-term pullback risk is real.")
+        if d["pe"] is not None and d["pe"] > 40:
+            brutal.append(f"P/E {d['pe']:.1f} — expensive vs sector; you're paying a premium for the growth story.")
+        if not brutal:
+            brutal.append("No explicit risk flags from research. This is NOT a clean bill of health — it means the data provided was thin. Dig into guidance, capex, and competitive moat before acting.")
+        html = html.replace("{{BRUTAL}}", "".join(f"<li>{b}</li>" for b in brutal))
+
         # Peer table
         if peers:
             rows = ""
@@ -265,9 +314,14 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--days", type=int, default=365)
     ap.add_argument("--peers", default="", help="Comma-separated peer tickers, e.g. TATAMOTORS.NS,ASHOKLEY.NS")
+    ap.add_argument("--research", default=None, help="Path to research.json with concalls/results/presentation data")
     a = ap.parse_args()
     out = a.out or f"stock_report_{a.ticker.replace('.', '_')}.pdf"
     d = fetch(a.ticker, a.days)
+    if a.research:
+        import json
+        with open(a.research) as f:
+            d["research"] = json.load(f)
     peers = fetch_peers([p for p in a.peers.split(",") if p.strip()]) if a.peers else None
     render(d, out, peers)
     print(f"OK: {out} ({os.path.getsize(out)} bytes)")
