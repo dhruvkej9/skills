@@ -1,7 +1,7 @@
 ---
 name: stock-analysis
 description: "Analyze a stock and generate a beautiful PDF report (WeasyPrint + Screener.in authenticated data + web research). NO yfinance."
-version: 2.5.0
+version: 2.6.0
 author: Dhruv Kejriwal
 license: MIT
 platforms: [linux, macos, windows]
@@ -17,6 +17,9 @@ metadata:
 Analyze any stock (NSE/BSE) and produce a **beautiful PDF report** covering price action, fundamentals, technicals, growth (Momentum & Growth thesis), **past 2+ earnings concalls**, **latest results**, **investor presentation**, and **brutally honest** risks.
 
 > ⚠️ **yfinance is REMOVED.** Its trailing data was stale/wrong end-to-end. All data comes from **Screener.in (authenticated session)** + **BSE/NSE filings** + **company IR**. The script is 100% `research.json`-driven — it does NOT fetch anything itself.
+
+## Output filename convention
+The generated PDF is named `<TICKER>_<QUARTER>.pdf` — e.g. `RRKABEL_Q1FY27.pdf`. The script derives this automatically from the ticker argument and the `results.quarter` field in `research.json` (format `Q1 FY27 (Jun 2026)` → `Q1FY27`). Do not use `stock_report_*.pdf` or any other naming. `--out` still overrides if explicitly passed.
 
 ## Trusted data sources (ONLY these, in order)
 1. **NSE** — always use NSE data first (current price, 52-week high/low, market cap, P/E). RRKABEL etc. are NSE-listed.

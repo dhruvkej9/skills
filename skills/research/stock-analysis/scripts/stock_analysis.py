@@ -7,7 +7,7 @@ from Screener.in / BSE / company filings). NO yfinance dependency.
 Usage:
     python3 stock_analysis.py "RELIANCE.NS" --research research.json [--out report.pdf]
 """
-import argparse, os, sys, tempfile, json
+import argparse, os, sys, tempfile, json, re
 from datetime import datetime
 
 from weasyprint import HTML
@@ -258,8 +258,15 @@ def main():
     ap.add_argument("--research", required=True, help="Path to research.json (all real data from Screener/BSE/filings)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    out = a.out or f"stock_report_{a.ticker.replace('.', '_')}.pdf"
     d = load(a.research)
+    if a.out:
+        out = a.out
+    else:
+        # RRKABEL_Q1FY27.pdf — ticker + quarter from research.json
+        sym = a.ticker.split(".")[0].upper()
+        q = re.search(r"(Q\d)\s+FY(\d+)", d.get("research", {}).get("results", {}).get("quarter", ""))
+        qs = f"{q.group(1)}FY{q.group(2)}" if q else "latest"
+        out = f"{sym}_{qs}.pdf"
     render(d, out)
     print(f"OK: {out} ({os.path.getsize(out)} bytes)")
     print(f"Price: {d['currency']} {d['price']:.2f}")
