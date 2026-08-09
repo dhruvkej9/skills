@@ -318,6 +318,10 @@ def render(d, out, peers=None):
         # Peer table — always include the TARGET as row 0 so it's in the "cars" list
         target_row = (f"<tr class='target'><td>★</td><td>{d['name']} ({d['ticker']}) <span class='tag'>TARGET</span></td>"
                       f"<td>{_pct(d['rev_growth'])}</td><td>{_pct(d['ni_growth'])}</td></tr>")
+        # Peers override: use real data from research (e.g. Screener) if provided
+        rpeers = research.get("peers")
+        if rpeers:
+            peers = rpeers
         if peers:
             rows = target_row
             for i, p in enumerate(peers, 1):
