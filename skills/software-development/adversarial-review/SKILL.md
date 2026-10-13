@@ -1,10 +1,10 @@
 ---
 name: adversarial-review
-description: Use when changes are complete (code or plan docs) and the
-agent is considering committing, proceeding with implementation, or
-marking work as done. Also use when an implementation plan has been
-
-drafted or modified before executing it.
+description: >-
+  Use when changes are complete (code or plan docs) and the agent is
+  considering committing, proceeding with implementation, or marking work as
+  done. Also use when an implementation plan has been drafted or modified
+  before executing it.
 ---
 
 <!--
