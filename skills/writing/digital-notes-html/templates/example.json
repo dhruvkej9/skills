@@ -1,0 +1,47 @@
+{
+  "title": "Field notes — example",
+  "date": "21 Oct 2026, example project",
+  "heading": "Example notes\nevery block once",
+  "subtitle": "A page that uses each block type, so the renderer's selftest covers all of them.",
+  "cover": [
+    {"type": "hub", "center": {"title": "CLAUDE.md", "sub": "every session"},
+     "spokes": [{"label": "rules/api.md", "note": "src/api/**"}, {"label": "rules/ui.md", "note": "web/**"}],
+     "aside": "on touch\nonly", "caption": "what loads when"}
+  ],
+  "sections": [
+    {"heading": "the verdict", "blocks": [
+      {"type": "grades", "items": [
+        {"letter": "A", "file": "api.md", "why": "house rules only", "tone": "a"},
+        {"letter": "C", "file": "ui.md", "why": "handbook retold", "tone": "c"}]},
+      {"type": "stickies", "items": [
+        {"title": "2 conflicts", "small": "same rule, opposite answers", "color": "yellow"},
+        {"title": "~3k tokens", "small": "to save", "color": "green"}]},
+      {"type": "stats", "items": [
+        {"num": "48 s", "label": "pip, cold", "tone": "bad"},
+        {"num": "6 s", "label": "uv, cold", "tone": "good"}]}
+    ]},
+    {"heading": "the details", "color": "blue", "blocks": [
+      {"type": "p", "text": "condensed from the `docs`, ==highlight==, !!warn!!, ++good++, ~~gone~~", "margin": "note"},
+      {"type": "h3", "text": "a small caps label"},
+      {"type": "list", "items": [
+        {"text": "kept, it earns its place", "state": "good"},
+        {"text": "wrong, fix it", "state": "bad", "sub": ["the nested detail"]},
+        {"text": "minor", "state": "meh"},
+        "plain line"]},
+      {"type": "cards", "items": [
+        {"title": "keep", "pen": "green", "tape": "green", "items": [{"text": "one", "state": "good"}]},
+        {"title": "cut", "pen": "red", "tape": "pink", "items": [{"text": "two", "state": "bad"}]}]},
+      {"type": "diff", "lines": ["- old line", "+ new line", "  context"]},
+      {"type": "conflict", "left": {"src": "CLAUDE.md", "text": "never X"}, "right": {"src": "rules/ui.md:12", "text": "X is fine"}},
+      {"type": "table", "headers": ["file", "lines"], "rows": [["`api.md`", "40"], ["`ui.md`", "90"]]},
+      {"type": "bars", "title": "Install time", "sub": "seconds, lower is better", "label_header": "tool", "value_header": "seconds",
+       "rows": [{"label": "pip", "value": 48, "display": "48 s"}, {"label": "uv", "value": 6, "display": "6 s", "tip": "uv: 6 s cold cache"}]},
+      {"type": "figure", "svg": "<svg viewBox=\"0 0 200 40\" width=\"200\"><circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"var(--hl-green)\"/></svg>", "caption": "raw svg"},
+      {"type": "html", "html": "<p class=\"hand\">raw html escape hatch</p>"}
+    ]},
+    {"heading": "the plan", "color": "green", "blocks": [
+      {"type": "todo", "items": [{"text": "done thing", "done": true, "eta": "done"}, {"text": "next thing", "eta": "1 line"}]}
+    ]}
+  ],
+  "footer": "less to read, nothing that contradicts"
+}
