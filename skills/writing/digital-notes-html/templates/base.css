@@ -18,7 +18,7 @@
     --card: #fffdf8;
     --shadow: 0 1px 0 rgba(0,0,0,.04), 0 8px 24px -12px rgba(60,50,30,.25);
   }
-  @media (prefers-color-scheme: dark) {
+  @media screen and (prefers-color-scheme: dark) {
     :root {
       --paper: #1d1c1a;
       --paper-edge: #262421;
@@ -267,8 +267,19 @@
     .conflict .vs { transform: none; }
   }
   @media print {
-    body { background: #fff; }
-    .tip { display: none; }
+    /* Size follows the printer (Letter from headless Chrome); the layout fits either. */
+    @page { margin: 10mm 0; background: #fbf8f1; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { max-width: none; padding: 0 9mm 0 25mm; }
+    .page::before { left: 17mm; }
+    .margin { left: -21mm; width: 17mm; font-size: 15px; }
+    h1 { font-size: 52px; }
+    .tip, .chart details { display: none; }
+    .grid.three { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+    .page .stats { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    h2, h3 { break-after: avoid; }
+    .card, .sticky, .grade, .stat, .chart, figure, .conflict, .diff, table.sheet, .todo li, ul.notes > li, p.lead { break-inside: avoid; }
+    footer { margin-top: 30px; }
   }
 
   /* Additions for the renderer: hero numbers, plain tables, two-column compare. */

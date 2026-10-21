@@ -20,11 +20,15 @@ owns the look. A new page costs one JSON file and two commands.
 4. **Look at it:** `bash scripts/shoot.sh out/index.html` writes
    `out/shots/part0.png`, `part1.png`, ... Read every part. Fix label collisions,
    clipped SVG, grids that wrap 4 + 1, text overflowing a card.
-5. **Hand over the path.** On WSL give `wslpath -w out/index.html` so it opens
-   from Windows.
+5. **PDF, when asked:** `bash scripts/pdf.sh out/index.html out/notes.pdf`
+   prints it with headless Chrome and writes `out/notes-pages/page-N.png`
+   previews. Read them: a heading alone at a page foot, a grid that wraps.
+6. **Hand over the path.** On WSL give `wslpath -w out/index.html` (or the PDF)
+   so it opens from Windows.
 
 `python3 scripts/render.py --selftest` checks the renderer after any edit to it.
-Needs Python 3.9+; `shoot.sh` also needs Pillow and `agent-browser`.
+Needs Python 3.9+; `shoot.sh` and `pdf.sh` also need `agent-browser`, plus
+Pillow and poppler (`pdftoppm`) for the previews.
 
 ## Writing style
 
@@ -102,3 +106,10 @@ All styling is `templates/base.css`, inlined into each page. Fonts are Caveat,
 Inter and JetBrains Mono from Google Fonts; offline, the page falls back to
 system fonts. A new block type is one `b_<name>(b)` function in `render.py`
 plus one use in `example.json`; the selftest fails until both exist.
+
+The PDF look is the `@media print` block in `base.css`: colours forced on,
+cards never split across pages, the paper colour carried into the page margins,
+narrower grid minimums so 4-wide rows still fit. Page size is whatever the
+printer uses (Letter from headless Chrome), because Chrome's CDP print ignores
+CSS `@page size`; the layout fits A4 and Letter alike. Chrome rather than
+WeasyPrint: the PDF matches the page on screen, and nothing extra to install.
