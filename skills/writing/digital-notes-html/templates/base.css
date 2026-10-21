@@ -286,3 +286,5 @@
   p.lead { margin: 6px 0 10px; }
   figure .wide { width: 100%; }
   .grid { margin-top: 26px; }
+  a { color: var(--ink); text-decoration-color: var(--ink-3); text-underline-offset: 3px; }
+  a:hover { background: var(--hl-yellow); }

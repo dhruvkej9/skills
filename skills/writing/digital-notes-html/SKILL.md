@@ -94,6 +94,7 @@ draws a lighter bar for a projected or estimated value.
 | `~~text~~` | red strike |
 | `[text](https://...)` | link |
 | `->` | → |
+| a newline (`\n`) | line break |
 
 ## Changing the look
 

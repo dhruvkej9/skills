@@ -63,7 +63,7 @@ def md(text: str) -> str:
     s = re.sub(r"!!(.+?)!!", r'<span class="mark-p">\1</span>', s)
     s = re.sub(r"\+\+(.+?)\+\+", r'<span class="mark-g">\1</span>', s)
     s = re.sub(r"~~(.+?)~~", r'<span class="strike">\1</span>', s)
-    s = s.replace("-&gt;", "→")
+    s = s.replace("-&gt;", "→").replace("\n", "<br>")
     return re.sub(r"\x00(\d+)\x00", lambda m: codes[int(m.group(1))], s)
 
 
